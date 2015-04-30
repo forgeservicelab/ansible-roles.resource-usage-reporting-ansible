@@ -30,6 +30,7 @@
     group: "{{ datasource.user.name }}"
     
 - name: Fetch resource-usage-reporting app
+  sudo_user: "{{ datasource.user.name }}"
   git:
     dest: "{{ datasource.app.dest }}"
     repo: "{{ datasource.app.repo }}"
@@ -37,9 +38,11 @@
     key_file: "/home/{{ datasource.user.name }}/.ssh/{{ datasource.app.repo_key }}"
 
 - name: Install shell script report_to_db.sh
+  sudo_user: "{{ datasource.user.name }}"
   action: template src=report_to_db.j2 dest="{{ datasource.app.dest }}/report_to_db.sh" owner="{{ datasource.user.name }}" group="{{ datasource.user.name }}" mode="u+rwx,g-rwx,o-rwx"
 
 - name: Install .openrc
+  sudo_user: "{{ datasource.user.name }}"
   action: template src=openrc.j2 dest="/home/{{ datasource.user.name }}/.openrc" owner="{{ datasource.user.name }}" group="{{ datasource.user.name }}" mode="u+rwx,g-rwx,o-rwx"
 
 #- name: Create db schema
