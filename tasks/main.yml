@@ -17,7 +17,7 @@
 - name: Setup authorized keys for the user account
   authorized_key: 
     user: "{{ datasource.user.name }}"
-    key: "{{ lookup('file', '%s' % item) }}"
+    key: "{{ lookup('file', ./files/'%s' % item) }}"
   with_items:
     - "{{ datasource.user.auth_keys }}"
 
