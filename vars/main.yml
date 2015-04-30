@@ -8,6 +8,7 @@ reporting_pkg_deps:
   - libpng3-dev
   - libfreetype6-dev
   - postgresql-client
+  - git
 reporting_pip_deps:
   - numpy
   - matplotlib
