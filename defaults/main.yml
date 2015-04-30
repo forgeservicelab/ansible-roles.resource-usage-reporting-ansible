@@ -1,0 +1,32 @@
+---
+# defaults file for resource-usage-reporting-ansible
+
+datasource:
+  user:
+    name: "desiredusername"
+    auth_keys:  # have your auth keys available in files folder
+      - 'auth_key.pub'
+  # Environment variables needed to access OpenStack
+  os:
+    auth_url: "https://cloud.forgeservicelab.fi:5001/v2.0"
+    tenant_id: "put your tenant id here"
+    tenant_name: "put your tenant name here"
+    username: "put your openstack user account here"
+    password: "put your openstack password here"
+
+  # Application that populates DB
+  app:
+    repo: "ssh://gitlab@git.forgeservicelab.fi:10022/forge/resource-usage-reporting.git"
+    repo_key: "git_access_key"
+    dest: "/home/desiredusername/bin/resource-usage-reporting"      
+  # DB name and default capacity values
+  db: 
+    user: "desiredusername"
+    name: "iaas"
+    host: "dbhostname"
+    password: "dbpassword"
+    defaults:
+      capacity:
+        vcpus: "1312"
+        memory: "4112384"
+        volume: "65536"

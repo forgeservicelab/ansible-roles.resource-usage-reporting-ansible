@@ -1,0 +1,33 @@
+#!/bin/sh
+export OS_AUTH_URL="{{ datasource.os.auth_url }}" 
+export OS_TENANT_ID="{{ datasource.os.tenant_id }}"
+export OS_TENANT_NAME="{{ datasource.os.tenant_name }}"
+export OS_USERNAME="{{ datasource.os.username }}"
+export OS_PASSWORD="{{ datasource.os.password }}"
+export PGPASSWORD="{{ datasource.db.password }}"
+dbname="{{ datasource.db.name }}"
+dbhost="{{ datasource.db.host }}"
+if [ $# -eq 0 ]; then
+    end=$(date -I )   # today
+    # start=$(date -I )
+    start=$(date -I --date=$end'+1 day ago') # yesterday
+    end=$start # yesterday
+else
+    start=$1
+    end=$2
+fi
+days=$(( (`date --date=$end +%s` - `date --date=$start +%s`) / (24*60*60) +1 ))
+cd ~/bin/resource-usage-reporting
+python ./usage2csv.py --start $start --end $end --quotas --csv --with-header > iaas_quota.csv
+python ./usage2csv.py --start $start --end $end --csv --with-header > iaas_usage.csv
+python ./usage2csv.py --start $start --end $end --volume --csv --with-header > iaas_volume_usage.csv
+echo '"Date","VCPUs","Memory MB","Volume GB"' > iaas_capasity.csv
+for a in $(seq 1 $days);
+do
+    echo "\"$start\",\"{{ datasource.db.defaults.capacity.vcpus }}\",\"{{ datasource.db.defaults.capacity.memory }}\",\"{{ datasource.db.defaults.capacity.volume }}\"" >> iaas_capasity.csv
+    start=$(date -I --date=$start'+1 day')
+done
+echo "\x \\COPY quota from 'iaas_quota.csv' DELIMITERS ',' CSV HEADER" | psql -h $dbhost $dbname
+echo "\x \\COPY usage from 'iaas_usage.csv' DELIMITERS ',' CSV HEADER" | psql -h $dbhost $dbname
+echo "\x \\COPY capasity from 'iaas_capasity.csv' DELIMITERS ',' CSV HEADER" | psql -h $dbhost $dbname 
+echo "\x \\COPY volumeusage from 'iaas_volume_usage.csv' DELIMITERS ',' CSV HEADER" | psql -h $dbhost $dbname

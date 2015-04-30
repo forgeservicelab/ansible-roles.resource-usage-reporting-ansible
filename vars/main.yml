@@ -1,0 +1,14 @@
+---
+# vars file for resource-usage-reporting-ansible
+
+reporting_pkg_deps:
+  - python-pip
+  - python-dev
+  - pkg-config
+  - libpng3-dev
+  - libfreetype6-dev
+  - postgresql-client
+reporting_pip_deps:
+  - numpy
+  - matplotlib
+  - freetype-py

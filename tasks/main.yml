@@ -1,0 +1,50 @@
+---
+# tasks file for resource-usage-reporting-ansible
+
+- name: Install system dependencies and pip
+  action: "{{ ansible_pkg_mgr }} name={{ item }} state=installed update-cache=yes"
+  with_items: 
+      - "{{ reporting_pkg_deps }}"
+
+- name: Install pip dependencies
+  pip: name="{{ item }}"
+  with_items:
+      - "{{ reporting_pip_deps }}"
+
+- name: Setup a user account
+  user: name="{{ datasource.user.name }}"
+
+- name: Setup authorized keys for the user account
+  authorized_key: 
+    user: "{{ datasource.user.name }}"
+    key: "{{ lookup('file', '%s' % item) }}"
+  with_items:
+    - "{{ datasource.user.auth_keys }}"
+
+- name: Setup git_access_key
+  copy:
+    src: "./files/{{ datasource.app.repo_key }}"
+    dest: "/home/{{ datasource.user.name }}/.ssh/{{ datasource.app.repo_key }}"
+    mode: 0600
+    owner: "{{ datasource.user.name }}"
+    group: "{{ datasource.user.name }}"
+    
+- name: Fetch resource-usage-reporting app
+  git:
+    dest: "{{ datasource.app.dest }}"
+    repo: "{{ datasource.app.repo }}"
+    ssh_opts: -o ForwardAgent=yes -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null
+    key_file: "/home/{{ datasource.user.name }}/.ssh/{{ datasource.app.repo_key }}"
+
+- name: Install shell script report_to_db.sh
+  action: template src=report_to_db.j2 dest="{{ datasource.app.dest }}/report_to_db.sh" owner="{{ datasource.user.name }}" group="{{ datasource.user.name }}" mode="u+rwx,g-rwx,o-rwx"
+
+- name: Install .openrc
+  action: template src=openrc.j2 dest="/home/{{ datasource.user.name }}/.openrc" owner="{{ datasource.user.name }}" group="{{ datasource.user.name }}" mode="u+rwx,g-rwx,o-rwx"
+
+#- name: Create db schema
+#  command: "PGPASSWORD={{ datasource.db.password }} psql -U {{ datasource.user.name }} -d 'host={{ datasource.db.host }} dbname={{ datasource.db.name }} sslmode=require' < {{ lookup('file', './files/iaas.sql') }}"
+  
+- name: Install cronjob to run the scipt
+  sudo_user: "{{ datasource.user.name }}"
+  action: cron name="run report_to_db.sh" minute="0" hour="21" job="cd {{ datasource.app.dest }}; ./report_to_db.sh >> ./report_to_db.log 2>&1"
