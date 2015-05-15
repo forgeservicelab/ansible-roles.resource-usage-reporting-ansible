@@ -6,7 +6,7 @@ This role deploys a resource-usage-reporting application.
 Requirements
 ------------
 
-iaas database and connections to it are enabled and schema is created as defined in ./files/iaas.sql. Either use the existing db server or use ansible-postgresql module to create it in the local server.
+iaas database and connections to it are enabled and schema is created as defined in ./files/iaas.sql. Either use the existing remote db server or use ansible-postgresql module to create it in the local server.
 
 Role Variables
 --------------

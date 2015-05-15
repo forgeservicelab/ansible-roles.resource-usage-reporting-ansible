@@ -45,9 +45,6 @@
   sudo_user: "{{ datasource.user.name }}"
   action: template src=openrc.j2 dest="/home/{{ datasource.user.name }}/.openrc" owner="{{ datasource.user.name }}" group="{{ datasource.user.name }}" mode="u+rwx,g-rwx,o-rwx"
 
-#- name: Create db schema
-#  command: "PGPASSWORD={{ datasource.db.password }} psql -U {{ datasource.user.name }} -d 'host={{ datasource.db.host }} dbname={{ datasource.db.name }} sslmode=require' < {{ lookup('file', './files/iaas.sql') }}"
-  
 - name: Install cronjob to run the scipt
   sudo_user: "{{ datasource.user.name }}"
   action: cron name="run report_to_db.sh" minute="0" hour="21" job="cd {{ datasource.app.dest }}; ./report_to_db.sh >> ./report_to_db.log 2>&1"
