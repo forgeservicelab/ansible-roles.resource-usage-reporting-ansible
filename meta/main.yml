@@ -2,8 +2,8 @@
 galaxy_info:
   author: Pasi Kivikangas
   description: Resource usage reporting app installation 
-  company: DIGILE Ltd
-  license: BSD
+  company: DIGILE Ltd.
+  license: MIT
   min_ansible_version: 1.8
   platforms:
   - name: Ubuntu
